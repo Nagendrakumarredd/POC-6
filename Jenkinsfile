@@ -83,7 +83,7 @@ pipeline {
                     git config user.name "Jenkins CI Engine"
                     git add k8s/deployment.yaml
                     git commit -m "Automated build update: image tag v${IMAGE_TAG} [skip ci]"
-                    git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@://github.com{GIT_USERNAME}/amazon-prime-poc.git
+                    git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@://github.com{GIT_USERNAME}/POC-6.git
                     git push origin HEAD:main
                     """
                 }
