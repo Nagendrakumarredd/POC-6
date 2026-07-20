@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prime-clone-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'REPLACE_WITH_YOUR_GITHUB_REPO_URL'
+    targetRevision: HEAD
+    path: k8s
+  destination:
+    server: 'https://default.svc'
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
