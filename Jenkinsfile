@@ -40,7 +40,8 @@ pipeline {
 
         stage('SonarQube Quality Scan') {
             steps {
-                echo "Forwarding static code mapping to SonarQube..."
+                // Invokes actual analysis scanner and maps results back to local loop port
+                sh "sonar-scanner -Dsonar.projectKey=prime-clone -Dsonar.sources=. -Dsonar.host.url=http://localhost:9000 -Dsonar.token=sqa_3a37a530b57e8d697b6f190a9598f0b64e1ec9f4"
             }
         }
 
