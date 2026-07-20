@@ -68,6 +68,7 @@ pipeline {
             }
         }
 
+
         stage('Update Git Manifest For GitOps') {
             steps {
                 withCredentials([usernamePassword(credentialsId: "${GITHUB_CRED_ID}", passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
