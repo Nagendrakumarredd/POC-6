@@ -38,10 +38,19 @@ pipeline {
             }
         }
 
-        stage('SonarQube Quality Scan') {
+        stage('SonarQube Scan') {
             steps {
-                // Invokes actual analysis scanner and maps results back to local loop port
-                sh "sonar-scanner -Dsonar.projectKey=prime-clone -Dsonar.sources=. -Dsonar.host.url=http://localhost:9000 -Dsonar.token=sqa_3a37a530b57e8d697b6f190a9598f0b64e1ec9f4"
+                script {
+                    def scannerHome = tool 'sonar-scanner'
+        
+                    sh """
+                    ${scannerHome}/bin/sonar-scanner \
+                    -Dsonar.projectKey=prime-clone \
+                    -Dsonar.sources=. \
+                    -Dsonar.host.url=http://<SONAR_IP>:9000 \
+                    -Dsonar.token=<TOKEN>
+                    """
+                }
             }
         }
 
@@ -57,41 +66,41 @@ pipeline {
             }
         }
 
-    stage('Push Image to AWS ECR') {
-        steps {
-            sh """
-            aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
-    
-            docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:latest
-    
-            docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}
-    
-            docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:latest
-    
-            docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}
-            """
-        }
-    }
-
-
-
-    stage('Update Git Manifest For GitOps') {
-        steps {
-                withCredentials([usernamePassword(credentialsId: "${GITHUB_CRED_ID}", passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+        stage('Push Image to AWS ECR') {
+            steps {
                 sh """
-                sed -i "s|image: .*|image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}|g" k8s/deployment.yaml
-            
-                git config user.email "jenkins@devsecops.poc"
-                git config user.name "Jenkins CI Engine"
-            
-                git add k8s/deployment.yaml
-                git commit -m "Automated build update: image tag v${IMAGE_TAG} [skip ci]" || true
-            
-                git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/tejaravutla287/POC-6.git
-            
-                git push origin HEAD:main
+                aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+        
+                docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:latest
+        
+                docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}
+        
+                docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:latest
+        
+                docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}
                 """
             }
+        }
+
+
+
+        stage('Update Git Manifest For GitOps') {
+            steps {
+                    withCredentials([usernamePassword(credentialsId: "${GITHUB_CRED_ID}", passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                    sh """
+                    sed -i "s|image: .*|image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}|g" k8s/deployment.yaml
+                
+                    git config user.email "jenkins@devsecops.poc"
+                    git config user.name "Jenkins CI Engine"
+                
+                    git add k8s/deployment.yaml
+                    git commit -m "Automated build update: image tag v${IMAGE_TAG} [skip ci]" || true
+                
+                    git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/tejaravutla287/POC-6.git
+                
+                    git push origin HEAD:main
+                    """
+                }
             }
         }
     }
