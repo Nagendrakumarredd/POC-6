@@ -90,7 +90,7 @@ pipeline {
                     git commit -m "Automated build update: image tag v\${IMAGE_TAG} [skip ci]"
                     
                     # 4. Corrected Git tracking endpoint layout mapping
-                    git remote set-url origin "https://\${GIT_USERNAME}:\${GIT_PASSWORD}@://github.com\${GIT_USERNAME}/POC-6.git"
+                    git remote set-url origin "https://\${GIT_USERNAME}:\${GIT_PASSWORD}@://github.com/\${GIT_USERNAME}/POC-6.git"
                     
                     # 5. Push deployment string tracking modifications straight up to GitHub main branch
                     git push origin HEAD:main
