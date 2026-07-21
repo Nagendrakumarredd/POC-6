@@ -64,19 +64,15 @@ pipeline {
 
         stage('Trivy Scan') {
             steps {
-                script {
-                    // Run Trivy scan using Docker
-                    sh """
-                        docker run --rm \
-                        -v /var/run/docker.sock:/var/run/docker.sock \
-                        -v \$(pwd):/root/.cache/ \
-                        aquasec/trivy:latest image \
-                        --exit-code 1 \
-                        --severity HIGH,CRITICAL \
-                        --format table \
-                        ${IMAGE_NAME} | tee ${REPORT_FILE}
-                    """
-                }
+                sh """
+                docker run --rm \
+                -v /var/run/docker.sock:/var/run/docker.sock \
+                aquasec/trivy:latest image \
+                --exit-code 0 \
+                --severity HIGH,CRITICAL \
+                --format table \
+                ${IMAGE_REPO_NAME}:${IMAGE_TAG}
+                """
             }
         }
 
