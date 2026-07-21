@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: prime-clone
-        image: ://amazonaws.com
+        image: 567017110325.dkr.ecr.us-east-1://{IMAGE_REPO_NAME}:6
         ports:
         - containerPort: 80
         resources:
