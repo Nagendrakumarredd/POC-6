@@ -169,6 +169,8 @@ pipeline {
                 kubectl get pods -n argocd
                 kubectl get pods -n monitoring
                 kubectl get pods -n default
+                kubectl get deployment 
+                kubectl get pods
                 '''
             }
         }
