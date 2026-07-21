@@ -6,7 +6,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'REPLACE_WITH_YOUR_GITHUB_REPO_URL'
+    # FIXED: Replaced template with your exact GitHub repository path
+    repoURL: 'https://github.com/tejaravutla287/POC-6'
     targetRevision: HEAD
     path: k8s
   destination:
