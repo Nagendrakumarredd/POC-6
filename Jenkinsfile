@@ -140,21 +140,30 @@ pipeline {
         }
         stage('Display Live Entry Details') {
             steps {
-                sh """
+                sh '''
                 echo "=========================================================="
-                echo "🚀 DEVSECOPS POC LIFECYCLE CONNECTIONS 🚀"
+                echo "DEVSECOPS POC LIFECYCLE CONNECTIONS"
                 echo "=========================================================="
-                NODE_IP=\$(kubectl get nodes -o wide | awk 'NR==2 {print \$7}')
-                ARGOCD_PORT=\$(kubectl get svc -n argocd argocd-server -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}')
-                GRAFANA_PORT=\$(kubectl get svc -n monitoring kube-stack-grafana -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}')
-                GRAFANA_PASS=\$(kubectl get secret -n monitoring kube-stack-grafana -o jsonpath='{.data.admin-password}' | base64 --decode)
-                
-                echo "🎬 APPLICATION MAIN PAGE URL: http://\${NODE_IP}:32080"
-                echo "🐙 ARGOCD CONTROLLER BOARD:  http://\${NODE_IP}:\${ARGOCD_PORT}"
-                echo "📊 GRAFANA CLUSTER METRICS:   http://\${NODE_IP}:\${GRAFANA_PORT}"
-                echo "🔑 DEFAULT GRAFANA PASSWORD:  \${GRAFANA_PASS} (User: admin)"
+        
+                NODE_IP=$(aws ec2 describe-instances \
+                --filters "Name=instance-state-name,Values=running" \
+                --query "Reservations[*].Instances[*].PublicIpAddress" \
+                --output text | head -1)
+        
+                ARGOCD_PORT=$(kubectl get svc argocd-server -n argocd -o jsonpath="{.spec.ports[0].nodePort}" 2>/dev/null || echo "N/A")
+        
+                GRAFANA_PORT=$(kubectl get svc -n monitoring kube-stack-grafana -o jsonpath="{.spec.ports[0].nodePort}" 2>/dev/null || echo "N/A")
+        
+                GRAFANA_PASS=$(kubectl get secret -n monitoring kube-stack-grafana -o jsonpath="{.data.admin-password}" 2>/dev/null | base64 --decode || echo "N/A")
+        
+                echo "Application URL : http://${NODE_IP}:32080"
+                echo "ArgoCD URL      : http://${NODE_IP}:${ARGOCD_PORT}"
+                echo "Grafana URL     : http://${NODE_IP}:${GRAFANA_PORT}"
+                echo "Grafana User    : admin"
+                echo "Grafana Password: ${GRAFANA_PASS}"
+        
                 echo "=========================================================="
-                """
+                '''
             }
         }
     }
