@@ -6,12 +6,13 @@ metadata:
 spec:
   project: default
   source:
-    # FIXED: Replaced template with your exact GitHub repository path
+    # Points cleanly to your active Git repository configuration layout
     repoURL: 'https://github.com/tejaravutla287/POC-6'
     targetRevision: HEAD
     path: k8s
   destination:
-    server: 'https://default.svc'
+    # FIXED: Restored the explicit canonical internal cluster loop API address
+    server: 'https://kubernetes.default.svc'
     namespace: default
   syncPolicy:
     automated:
