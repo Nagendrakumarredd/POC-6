@@ -122,8 +122,8 @@ pipeline {
             steps {
                 sh '''
                 # 1. Grant EKS nodes permission to pull images from ECR
-                NODE_ROLE=$(aws iam list-roles --query "Roles[?contains(RoleName, 'monitoring_node')].RoleName" --output text)
-        
+                NODE_ROLE="eks-node-poc-unique-role-20260723072631875400000002"
+
                 aws iam attach-role-policy \
                   --role-name $NODE_ROLE \
                   --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly || true
